@@ -119,7 +119,7 @@ def nn_cost_function(nn_params, input_layer_size, hidden_layer_size, num_labels,
     J = (1.0/m) * np.sum(np.sum(-Y * np.log(a3) - (1.0 - Y) * np.log(1.0 - a3)));
     
     # Add regularization
-    J += wrp_lambda/(2.0*m) * (np.sum(np.sum(Theta1**2)) + np.sum(np.sum(Theta2**2)))
+    J += wrp_lambda/(2.0*m) * (np.sum(Theta1**2) + np.sum(Theta2**2))
     
     # Implement the backpropagation algorithm to compute the gradients
     d3 = a3 - Y
