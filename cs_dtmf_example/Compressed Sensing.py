@@ -1,4 +1,3 @@
-
 # coding: utf-8
 
 # http://brocabrain.blogspot.ru/2012/10/compressed-sensing-with-sklearn-dtmf.html
@@ -33,22 +32,22 @@ import numpy as np
 N = 5000
 FS = 4e4
 M = 500
-f1, f2 = 697, 1336 # Pick any two touchtone frequencies
-duration = 1./8
-t = np.linspace(0, duration, duration*FS)
-f = np.sin(2*np.pi*f1*t) + np.sin(2*np.pi*f2*t)
-f = np.reshape(f, (len(f),1))
+f1, f2 = 697, 1336  # Pick any two touchtone frequencies
+duration = 1. / 8
+t = np.linspace(0, duration, duration * FS)
+f = np.sin(2 * np.pi * f1 * t) + np.sin(2 * np.pi * f2 * t)
+f = np.reshape(f, (len(f), 1))
 
 # Displaying the test signal
-plot(t,f)
+plot(t, f)
 title('Original Signal')
 show()
 
 # Randomly sampling the test signal
-k = np.random.randint(0,N,(M,))
-k = np.sort(k) # making sure the random samples are monotonic
+k = np.random.randint(0, N, (M,))
+k = np.sort(k)  # making sure the random samples are monotonic
 b = f[k]
-plot(t,f,'b', t[k],b,'r.')
+plot(t, f, 'b', t[k], b, 'r.')
 title('Original Signal with Random Samples')
 show()
 
@@ -57,8 +56,8 @@ show()
 
 # In[12]:
 
-D = dct(np.eye(N))
-A = D[k,:]
+D = np.fft.fft(np.eye(N))
+A = D[k, :]
 
 
 # Here $A$ is a matrix which contains a subset of 500 discrete cosine bases, and we need to solve $Ax=b$ for $x$. It is a nonlinear optimization problem and there are many solutions, but it turns out that the one that minimizes the $L_1$ norm of the solution gives the best estimate of the original signal. Since this is an optimization problem, it can be solved with many of the methods in scipy.optimize, say by taking the least squares solution of the equation (or the $L_2$ norm) as the first guess and minimizing iteratively. But I took the easier approach and used the Lasso estimator in the sklearn package, which is essentially a linear estimator that penalizes (regularizes) its weights in the $L_1$ sense. (A really cool demonstration of compressed sensing for images using Lasso is [here](http://scikit-learn.org/0.14/auto_examples/applications/plot_tomography_l1_reconstruction.html)).
@@ -66,15 +65,15 @@ A = D[k,:]
 # In[18]:
 
 lasso = Lasso(alpha=0.001)
-lasso.fit(A,b.reshape((M,)))
+lasso.fit(A, b.reshape((M,)))
 
 # Plotting the reconstructed coefficients and the signal
 plot(lasso.coef_)
 # xlim([0, 500])
-title('IDCT of the Reconstructed Signal')
-recons = dct(lasso.coef_.reshape((N,1)),axis=0)
+title('FFT of the Reconstructed Signal')
+recons = np.fft.ifft(lasso.coef_.reshape((N, 1)), axis=0)
 figure()
-plot(t,recons)
+plot(t, recons)
 title('Reconstucted Signal')
 show()
 
@@ -84,7 +83,7 @@ show()
 # In[8]:
 
 recons_sparse = coo_matrix(lasso.coef_)
-sparsity = 1 - float(recons_sparse.getnnz())/len(lasso.coef_)
+sparsity = 1 - float(recons_sparse.getnnz()) / len(lasso.coef_)
 print sparsity
 
 
